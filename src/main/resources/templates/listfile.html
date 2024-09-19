@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>文件展示</title>
+    <link href="/semantic-ui/semantic.css" rel="stylesheet" type="text/css">
+    <script src="/semantic-ui/jquery-3.5.1.js"></script>
+    <script src="/semantic-ui/semantic.js"></script>
+    <link href="/css/my.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+<div class="ui page dimmer">
+    <div class="content">
+        Hello
+    </div>
+</div>
+<div class="ui container">
+    <div class="ui attached segment">
+        <button class="ui right labeled icon button" id="upload-button">
+            <i class="upload icon"></i>
+            上传
+        </button>
+        <h1 style="position: absolute; top: 50%; right: 45%; transform: translateY(-100%);">云盘系统</h1>
+        <a th:href="@{/index}" class="ui basic button"
+           style="position: absolute; top: 50%; right: 20px; transform: translateY(-50%);"><i class="icon user"></i>查看用户</a>
+        <a th:href="@{/index}" class="ui button  pink"
+           style="position: absolute; top: 50%; right: 150px; transform: translateY(-50%);">注销</a>
+    </div>
+    <table class="ui celled striped table">
+        <thead>
+        <tr>
+            <th colspan="5">
+                <div class="ui breadcrumb">
+                    我的网盘：
+                    <th:block th:each="path:${userpath}">
+                        <a th:href="@{/listfile?path={path}(path=${path[0]})}" class="section"
+                           th:text="(${path[1]} != ${userid}) ? ${path[1]} : 'User' ">User</a>
+                        <i class="right angle icon divider"></i>
+                    </th:block>
+                </div>
+            </th>
+        </tr>
+        <tr>
+            <th>文件名</th>
+            <th>文件类型</th>
+            <th>文件大小</th>
+            <th>修改时间</th>
+            <th>
+                操作
+                <div class="ui samll vertical animated button" tabindex="0" style="left:  70%" id="mkdir">
+
+                    <div class="hidden content">
+                        新增目录
+                    </div>
+
+                    <div class="visible content">
+                        <i class="folder open icon"></i>
+                    </div>
+
+                </div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="file:${list}">
+            <td>
+                <a th:href="@{/listfile?path={now}/{name}(now=${nowpath}, name=${file.fileName})}" class="file-link">
+                    <i th:classappend="${file.isDir}?'folder icon':'file outline icon'" style="color: black;"></i>
+                    <span th:text="${file.fileName}" id="filename">package.json</span>
+                </a>
+            </td>
+            <td th:text="${file.isDir}?'文件夹':'文件'">文件夹</td>
+            <td class="right aligned" th:text="${file.size}">30MB</td>
+            <td class="right aligned" th:text="${file.lastTime}">10 hours ago</td>
+            <td>
+                <a th:href="@{/revise?url={now}&oldname={name}(now=${nowpath}, name=${file.fileName})}"
+                   th:name="${file.fileName}" class="ui green basic button">重命名</a>
+                <a th:href="@{/deletefile?path={now}/{name}(now=${nowpath}, name=${file.fileName})}"
+                   class="ui red basic button" th:name="${file.fileName}">删除</a>
+                <a th:href="@{/download?path={now}/{name}(now=${nowpath}, name=${file.fileName})}"
+                   class="ui blue basic button" th:name="${file.fileName}">下载</a>
+                <input type="hidden" th:value="${file.fileName}"/>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="ui success  message" th:unless="${#strings.isEmpty(message)}">
+        <i class="close icon"></i>
+        <div class="header">提示：</div>
+        <p th:text="${message}"></p>
+    </div>
+</div>
+
+<!--新增文件夹弹窗-->
+<div id="mkModal" class="ui longer modal">
+    <div class="ui huge header">创建文件夹
+        <i class="folder open outline huge  icon"></i>
+    </div>
+    <div class="ui labeled input" style="width: 300px">
+        <div class="ui label" id="pathLabel"></div>
+        <input id="dirname" type="text" placeholder="请输入文件名称">
+        <input type="hidden" th:value="${nowpath}"/>
+    </div>
+    <div class="actions">
+        <div id="mkModalNo" class="ui red button">
+            取消
+        </div>
+        <div id="mkModalYes" class="ui positive right labeled icon button">
+            创建
+            <i class="checkmark icon"></i>
+        </div>
+    </div>
+</div>
+<!--重命名弹窗-->
+<div id="rnModal" class="ui longer modal">
+    <div class="ui huge header">文件重命名
+        <i class="edit outline huge  icon"></i>
+    </div>
+    <div class="ui labeled input" style="width: 300px">
+        <div class="ui label" id="pathLabel"></div>
+        <input id="newname" type="text" placeholder="请输入新的名称">
+        <input type="hidden" th:value="${nowpath}"/>
+    </div>
+    <div class="actions">
+        <div id="rnModalNo" class="ui red button">
+            取消
+        </div>
+        <div id="rnModalYes" class="ui positive right labeled icon button">
+            重命名
+            <i class="checkmark icon"></i>
+        </div>
+    </div>
+</div>
+<!--上传文件弹框-->
+<div id="upModel" class="ui longer modal" style="position: relative;height: 25%;">
+    <div class="ui huge header">上传文件
+        <i class="cloud upload icon"></i>
+    </div>
+    <form id="upform" method="POST" th:action="@{/upload}" enctype="multipart/form-data"
+          style="height: 100%;width: 100%">
+        <div class="ui labeled input" style="height: 50px">
+            <div id="upModelInputHeader" class="ui label"></div>
+            <input id="upModelInput" name="upfile" type="file" placeholder="请选择上传文件" style="height: 100%;width: 100%">
+            <input type="hidden" name="hdfspath" th:value="${nowpath}"/>
+        </div>
+
+        <div class="actions" style="position: absolute;bottom: 10px;right: 10px;">
+            <div id="upModelNo" class="ui red button">
+                取消
+            </div>
+            <button id="upModelYes" type="submit" class="ui blue submit button">
+                上传
+                <i class="upload icon"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    var nowPath = [[${nowpath}]];
+    var userid = [[${userid}]];
+    if (nowPath === userid) {
+        nowPath = "User";
+    }
+
+    /**
+     * 上传
+     */
+
+    $(document).ready(function () {
+        //弹窗初始化
+        $('#upModel').modal({
+            // 这里可以添加一些配置选项，比如自动打开、关闭回调等
+        });
+        // 监听id为upload-button的上传按钮
+        $('#upload-button').on('click', function (a) {
+            document.getElementById('upModelInputHeader').textContent = "上传位置为：" + nowPath + "/";
+            $('#upModel').modal('show');
+        });
+        $('#upModelNo').on('click', function (a) {
+            $('#upModel').modal('hide');
+        });
+    });
+    /**
+     * 重命名js
+     */
+    var rnurl, name0;
+    $(document).ready(function () {
+        // 初始化模态弹窗（注意：通常Semantic UI的模态弹窗不需要手动初始化，除非有特定的配置）
+        $('#rnModal').modal({
+            // 这里可以添加一些配置选项，比如自动打开、关闭回调等
+        });
+        // 监听按钮的点击事件
+        $('.ui.green.basic.button').on('click', function (a) {
+            a.preventDefault(); // 阻止默认的链接跳转行为
+            rnurl = $(this).attr('href');
+            name0 = $(this).attr('name');
+            document.getElementById('pathLabel').textContent = "重命名: " + name0 + "为";
+            // 显示模态弹窗
+            $('#rnModal').modal('show');
+        });
+        $('#rnModalNo').on('click', function () {
+            // 点击关闭弹窗
+            $('#rnModal').modal('hide');
+            // 清空模态框内所有input元素的内容
+            $('#rnModal input').val('');
+        });
+        $('#rnModalYes').on('click', function () {
+            var name1 = $('#newname').val();
+            var forbiddenChars = ['\\', '/', '&', '!', '?', '"', '#', ' ']; // 定义不允许的字符数组
+            // 检查name1是否包含禁止的字符
+            var containsForbiddenChar = false;
+            $.each(forbiddenChars, function (index, char) {
+                if (name1.includes(char)) {
+                    containsForbiddenChar = true;
+                    return false; // 跳出循环
+                }
+            });
+            // 如果包含禁止的字符，则弹出提醒并清空input
+            if (containsForbiddenChar) {
+                alert("文件夹中不能含有\\/：*?“”");
+                $('#newname').val('');
+            }
+            // 检查name0和name1是否相同
+            if (name0 === name1) {
+                alert("不能与旧文件名相同");
+                $('#newname').val(''); // 清空input的内容
+                return; // 退出函数，不再检查其他条件
+            }
+
+            var rnpath = rnurl + "&newname=" + name1;
+            rnurl = "";
+            window.location.href = rnpath;
+            $('#rnModal').modal('hide');
+        });
+
+    });
+    /**
+     * 新增文件夹js
+     */
+    document.getElementById('pathLabel').textContent = nowPath + "/";
+    $(document).ready(function () {
+        // 初始化模态弹窗（注意：通常Semantic UI的模态弹窗不需要手动初始化，除非有特定的配置）
+        $('#mkModal').modal({
+            // 这里可以添加一些配置选项，比如自动打开、关闭回调等
+        });
+        // 监听按钮的点击事件
+        $('#mkdir').on('click', function () {
+
+            // 显示模态弹窗
+            $('#mkModal').modal('show');
+        });
+        $('#mkModalNo').on('click', function () {
+            // 点击关闭弹窗
+            $('#mkModal').modal('hide');
+            // 清空模态框内所有input元素的内容
+            $('#mkModal input').val('');
+        });
+        $('#mkModalYes').on('click', function () {
+            var dirname = $('#dirname').val();
+            var forbiddenChars = ['\\', '/', '&', '!', '?', '"', '#', ' ']; // 定义不允许的字符数组
+            var containsForbiddenChar = false; // 声明并初始化变量
+            forbiddenChars.forEach(function (char) {
+                if (dirname.includes(char)) {
+                    containsForbiddenChar = true; // 使用正确的变量名
+                    return false; // 跳出循环
+                }
+            });
+            // 如果包含不允许的字符，则弹出提醒并清空input
+            if (containsForbiddenChar) {
+                alert("文件夹中不能含有\\/&!?#“"); // 弹出提醒框
+                $('#dirname').val(''); // 清空input的内容
+            } else {
+                nowpath = [[${nowpath}]];
+                var dirpath = "/mkdir?dirpath=" + nowPath + "/" + dirname;
+                window.location.href = dirpath;
+            }
+        });
+
+    });
+
+    /**
+     * 删除文件js
+     */
+    // 删除确认
+    $(document).ready(function () {
+        $('.ui.red.basic.button').click(function (e) {
+            e.preventDefault(); // 阻止默认的链接跳转行为
+            // 弹出确认弹窗
+            var buttonName = $(this).attr('name');
+            var isConfirmDelete = confirm("确定要删除该文件吗？\n\n（如果是目录会删除其下所有文件）\n\n文件名称为：/" + buttonName);
+            if (isConfirmDelete) {
+                // 用户点击了"是"，则跳转到指定的链接
+                window.location.href = $(this).attr('href');
+            }
+        });
+    });
+    // 新建文件夹弹窗
+    // 消息弹窗
+    $(".message .close").on('click', function () {
+        $(this).closest(".message").transition("fade");
+    })
+
+</script>
+</body>
+</html>

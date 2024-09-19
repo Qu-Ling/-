@@ -1,0 +1,15 @@
+spring:
+  application.name: HDFS_Yun
+  servlet:
+    multipart:
+      #超过的话会显示无法访问链接
+      #最大文件大小
+      max-file-size: 128MB
+      #总共文件大小
+      max-request-size: 128MB
+hadoop:
+  namenode: hdfs://xingtie2:8020
+  userdata: /data/userinfo.dat
+  localpath: C:\Users\符华\Downloads\
+
+
