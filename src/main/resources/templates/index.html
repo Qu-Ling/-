@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>登入</title>
+    <link href="/semantic-ui/semantic.css" rel="stylesheet" type="text/css">
+    <script src="/semantic-ui/jquery-3.5.1.js"></script>
+    <script src="/semantic-ui/semantic.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+<div class="main-content">
+    <div>
+        <h2 class="ui center aligned icon header">
+            <i class="circular users icon"></i>
+            网络云盘登入
+        </h2>
+    </div>
+    <div class="ui placeholder segment">
+        <div class="ui two column very relaxed stackable grid" style="width: 650px">
+            <div class="column">
+                <div class="ui form">
+                    <form id="loginForm" action="/index" method="POST">
+                        <div class="field">
+                            <label>账号</label>
+                            <div class="ui left icon input">
+                                <i class="user icon"></i>
+                                <input type="text" name="userid" placeholder="userid" required >
+                            </div>
+                        </div>
+                        <input type="hidden" name="username">
+                        <div class="field">
+                            <label>密码</label>
+                            <div class="ui left icon input">
+                                <i class="lock icon"></i>
+                                <input type="password" name="userpwd" placeholder="Password" required>
+                            </div>
+                        </div>
+                        <input type="hidden" name="usertype">
+                        <button type="submit" class="ui blue submit button">
+                            登入
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="middle aligned column" >
+                <div class="ui icon header" style=" top: 50%; left: 35%;margin: 0 auto;">
+                    <i class="address book icon"></i>
+                    加入云盘
+                </div>
+                <a th:href="@{/register}" class="ui primary button"
+                   style="position: absolute; left: 20%; width:200px">注册用户</a>
+            </div>
+        </div>
+        <div class="ui vertical divider">
+            Or
+        </div>
+    </div>
+    <!--当 message 不为空时则条件为真，该标签会被渲染；当 message为空时条件为假，该标签不会被渲染。-->
+    <div class="ui success  message" th:unless="${#strings.isEmpty(message)}">
+        <i class="close icon"></i>
+        <div class="header">提示：</div>
+        <p th:text="${message}"></p>
+    </div>
+</div>
+<!--为具有 .message 类的元素中的关闭按钮添加了点击事件处理程序，当用户点击关闭按钮时，会触发渐隐消失的动画效果。-->
+<script>
+    $(".message .close").on('click',function () {
+        $(this).closest(".message").transition("fade");
+    })
+</script>
+</body>
+</html>

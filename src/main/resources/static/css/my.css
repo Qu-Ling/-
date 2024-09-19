@@ -1,0 +1,19 @@
+/* 默认状态下链接的颜色 */
+#filename {
+    color: black;
+    text-decoration: none; /* 可选：去除下划线 */
+}
+
+/* 鼠标悬停时链接的颜色 */
+#filename:hover {
+    color: #4b9bd5;
+}
+.url {
+    color: black;
+    text-decoration: none; /* 可选：去除下划线 */
+}
+
+/* 鼠标悬停时链接的颜色 */
+.url:hover {
+    color: #4b9bd5;
+}
